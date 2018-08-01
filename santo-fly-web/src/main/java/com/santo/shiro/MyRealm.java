@@ -8,6 +8,7 @@ import com.santo.entity.Role;
 import com.santo.exception.UnauthorizedException;
 import com.santo.entity.User;
 import com.santo.entity.UserToRole;
+import com.santo.model.MenuModel;
 import com.santo.service.IMenuService;
 import com.santo.service.IRoleService;
 import com.santo.service.IUserService;
@@ -75,8 +76,8 @@ public class MyRealm extends AuthorizingRealm {
         /**/
         //控制菜单级别按钮  类中用@RequiresPermissions("user:list") 对应数据库中code字段来控制controller
         ArrayList<String> pers = new ArrayList<>();
-        List<Menu> menuList = menuService.findMenuByRoleCode(userToRole.getRoleCode());
-        for (Menu per : menuList) {
+        List<MenuModel> menuList = menuService.findMenuByRoleCode(userToRole.getRoleCode());
+        for (MenuModel per : menuList) {
              if (!ComUtil.isEmpty(per.getCode())) {
                   pers.add(String.valueOf(per.getCode()));
               }

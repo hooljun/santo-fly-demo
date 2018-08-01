@@ -12,6 +12,7 @@ import com.santo.base.PublicResult;
 import com.santo.base.PublicResultConstant;
 import com.santo.entity.SmsVerify;
 import com.santo.entity.User;
+import com.santo.model.UserModel;
 import com.santo.service.ISmsVerifyService;
 import com.santo.service.IUserService;
 import com.santo.util.ComUtil;
@@ -25,8 +26,10 @@ import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.annotations.ApiIgnore;
 
 import java.util.List;
 
@@ -56,8 +59,13 @@ public class UserController {
      * @throws Exception
      */
     @GetMapping("/currentUser")
-    public PublicResult<User> getUser( @CurrentUser User user) throws Exception{
-        return new PublicResult<User>(PublicResultConstant.SUCCESS, user);
+    public PublicResult<UserModel> getUser(@ApiIgnore @CurrentUser User user) throws Exception{
+        UserModel userModel = null;
+        if(user != null){
+            userModel = new UserModel();
+            BeanUtils.copyProperties(user,userModel);
+        }
+        return new PublicResult<>(PublicResultConstant.SUCCESS, userModel);
     }
 
     @PostMapping("/mobile")

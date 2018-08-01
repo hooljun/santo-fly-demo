@@ -7,11 +7,14 @@ import com.santo.config.ResourcesConfig;
 import com.santo.config.ThirdPartyLoginHelper;
 import com.santo.entity.User;
 import com.santo.entity.UserThirdparty;
+import com.santo.model.LoginUserAndMenuModel;
 import com.santo.model.ThirdPartyUser;
+import com.santo.model.UserModel;
 import com.santo.service.IUserService;
 import com.santo.service.IUserThirdpartyService;
 import com.santo.util.ComUtil;
 import org.mindrot.jbcrypt.BCrypt;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -162,8 +165,8 @@ public class ThirdPartyLoginController {
 
 
     private void writeHrefHtml(HttpServletRequest request, HttpServletResponse response, ThirdPartyUser thirdUser) throws Exception {
-        Map<String, Object> stringObjectMap = thirdPartyLogin(request, thirdUser);
-        User user = (User)stringObjectMap.get("user");
+        LoginUserAndMenuModel loginUserAndMenuModel = thirdPartyLogin(request, thirdUser);
+        UserModel userModel = loginUserAndMenuModel.getUserModel();
         response.setHeader("Content-type", "text/html;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         //这里需要前端配合,把回传的自己系统的token写到header的Authentication字段里
@@ -175,7 +178,7 @@ public class ThirdPartyLoginController {
                 "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
                 "    <meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\">\n" +
                 "    <title>Document</title>\n" +
-                "    <script>window.location.href='"+ResourcesConfig.THIRDPARTY.getString("login_success")+"?token="+user.getToken()+"'</script>\n" +
+                "    <script>window.location.href='"+ResourcesConfig.THIRDPARTY.getString("login_success")+"?token="+userModel.getToken()+"'</script>\n" +
                 "</head>\n" +
                 "<body>\n" +
                 "</body>\n" +
@@ -183,16 +186,20 @@ public class ThirdPartyLoginController {
                 "</html>");
     }
 
-    private  Map<String, Object>  thirdPartyLogin(HttpServletRequest request, ThirdPartyUser param) throws Exception{
-        User sysUser;
+    private LoginUserAndMenuModel thirdPartyLogin(HttpServletRequest request, ThirdPartyUser param) throws Exception{
+        UserModel userModel = null;
         // 查询是否已经绑定过
         UserThirdparty userThirdparty = userThirdpartyService.selectOne(new EntityWrapper<UserThirdparty>()
                 .where("provider_type = {0} and open_id = {1}", param.getProvider(), param.getOpenid()));
         if (ComUtil.isEmpty(userThirdparty)) {
-            sysUser =userThirdpartyService.insertThirdPartyUser(param, BCrypt.hashpw("123456", BCrypt.gensalt()));
+            userModel =userThirdpartyService.insertThirdPartyUser(param, BCrypt.hashpw("123456", BCrypt.gensalt()));
         } else {
-            sysUser = userService.selectById(userThirdparty.getUserNo());
+            User sysUser = userService.selectById(userThirdparty.getUserNo());
+            if (sysUser != null) {
+                userModel = new UserModel();
+                BeanUtils.copyProperties(sysUser,userModel);
+            }
         }
-        return userService.getLoginUserAndMenuInfo(sysUser);
+        return userService.getLoginUserAndMenuInfo(userModel);
     }
 }

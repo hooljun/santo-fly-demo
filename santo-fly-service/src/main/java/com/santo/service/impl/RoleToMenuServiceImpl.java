@@ -23,8 +23,6 @@ import java.util.List;
 public class RoleToMenuServiceImpl extends ServiceImpl<RoleToMenuMapper, RoleToMenu> implements IRoleToMenuService {
 
     @Override
-    //redis生成key注解，以类名方法名和参数组成key
-//    @Cacheable(value = "UserToRole",keyGenerator="wiselyKeyGenerator")
     public List<RoleToMenu> selectByRoleCode(String roleCode) {
         EntityWrapper<RoleToMenu> ew = new EntityWrapper<>();
         ew.where("role_code={0}", roleCode);

@@ -4,10 +4,13 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.santo.base.Constant;
 import com.santo.entity.Menu;
 import com.santo.mapper.MenuMapper;
+import com.santo.model.MenuModel;
 import com.santo.service.IMenuService;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +30,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
     private MenuMapper menuMapper;
 
     @Override
-    //redis方法级别的缓存，需要做缓存打开改注解即可
-//    @Cacheable(value = "UserToRole",keyGenerator="wiselyKeyGenerator")
     public List<Menu> selectByIds(List<Integer> permissionIds) {
         EntityWrapper<Menu> ew = new EntityWrapper<>();
         ew.in("menu_id", permissionIds);
@@ -36,17 +37,25 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements IM
     }
 
     @Override
-//    @Cacheable(value = "UserToRole",keyGenerator="wiselyKeyGenerator")
-    public List<Menu> findMenuByRoleCode(String roleId) {
-        return menuMapper.findMenuByRoleCode(roleId);
+    public List<MenuModel> findMenuByRoleCode(String roleId) {
+        List<MenuModel> menuModelList = new ArrayList<>();
+        List<Menu> menuList = menuMapper.findMenuByRoleCode(roleId);
+        if(!CollectionUtils.isEmpty(menuList)){
+           for(Menu menu : menuList){
+               MenuModel menuModel = new MenuModel();
+               BeanUtils.copyProperties(menu,menuModel);
+               menuModelList.add(menuModel);
+           }
+        }
+        return menuModelList;
     }
 
     @Override
-    public  List<Menu> treeMenuList(String pId, List<Menu> list) {
-        List<Menu> IteratorMenuList = new ArrayList<>();
-        for (Menu m : list) {
+    public  List<MenuModel> treeMenuList(String pId, List<MenuModel> list) {
+        List<MenuModel> IteratorMenuList = new ArrayList<>();
+        for (MenuModel m : list) {
             if (String.valueOf(m.getParentId()).equals(pId)) {
-                List<Menu> childMenuList = treeMenuList(String.valueOf(m.getMenuId()), list);
+                List<MenuModel> childMenuList = treeMenuList(String.valueOf(m.getMenuId()), list);
                 m.setChildMenu(childMenuList);
                 if(m.getMenuType() == Constant.TYPE_MENU){
                     IteratorMenuList.add(m);

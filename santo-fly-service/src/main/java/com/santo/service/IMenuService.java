@@ -2,6 +2,7 @@ package com.santo.service;
 
 import com.santo.entity.Menu;
 import com.baomidou.mybatisplus.service.IService;
+import com.santo.model.MenuModel;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public interface IMenuService extends IService<Menu> {
      * @param roleCode 角色主键
      * @return
      */
-    List<Menu> findMenuByRoleCode(String roleCode);
+    List<MenuModel> findMenuByRoleCode(String roleCode);
 
     /**
      * 获取菜单树形结构
@@ -35,7 +36,7 @@ public interface IMenuService extends IService<Menu> {
      * @param list
      * @return
      */
-    List<Menu> treeMenuList(String pId, List<Menu> list);
+    List<MenuModel> treeMenuList(String pId, List<MenuModel> list);
 
 
 }

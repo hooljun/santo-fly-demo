@@ -1,9 +1,9 @@
 package com.santo.service;
 
-import com.santo.entity.User;
-import com.santo.entity.UserThirdparty;
 import com.baomidou.mybatisplus.service.IService;
+import com.santo.entity.UserThirdparty;
 import com.santo.model.ThirdPartyUser;
+import com.santo.model.UserModel;
 
 /**
  * <p>
@@ -15,6 +15,6 @@ import com.santo.model.ThirdPartyUser;
  */
 public interface IUserThirdpartyService extends IService<UserThirdparty> {
 
-    User insertThirdPartyUser(ThirdPartyUser param, String password)throws Exception;
+    UserModel insertThirdPartyUser(ThirdPartyUser param, String password)throws Exception;
 
 }

@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.santo.base.Constant;
 import com.santo.entity.Menu;
+import com.santo.model.LoginUserAndMenuModel;
+import com.santo.model.MenuModel;
+import com.santo.model.UserModel;
 import com.santo.service.IMenuService;
 import com.santo.service.IUserService;
 import com.santo.service.IUserToRoleService;
@@ -13,6 +16,7 @@ import com.santo.entity.UserToRole;
 import com.santo.mapper.UserMapper;
 import com.santo.util.GenerationSequenceUtil;
 import com.santo.util.JWTUtil;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,53 +45,67 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
     private UserMapper mapper;
 
     @Override
-//    @Cacheable(value = "UserToRole",keyGenerator="wiselyKeyGenerator")
-    public User getUserByUserName(String username) {
-        System.out.println("执行getUserByUserName方法了.....");
+    public UserModel getUserByUserName(String username) {
         EntityWrapper<User> ew = new EntityWrapper<>();
         ew.where("user_name={0}", username);
-        return this.selectOne(ew);
+        User user = this.selectOne(ew);
+        UserModel userModel = null;
+        if(user != null){
+            userModel = new UserModel();
+            BeanUtils.copyProperties(user,userModel);
+        }
+        return userModel;
     }
 
     @Override
-    public User getUserByMobile(String mobile) {
+    public UserModel getUserByMobile(String mobile) {
         EntityWrapper<User> ew = new EntityWrapper<>();
         ew.eq("mobile", mobile);
-        return this.selectOne(ew);
+        User user = this.selectOne(ew);
+        UserModel userModel = null;
+        if(user != null){
+            userModel = new UserModel();
+            BeanUtils.copyProperties(user,userModel);
+        }
+        return userModel;
     }
 
     @Override
-    public User register(User user, String  roleCode) {
+    public UserModel register(UserModel userModel, String  roleCode) {
+        User user = new User();
+        BeanUtils.copyProperties(userModel, user);
         user.setUserNo(GenerationSequenceUtil.generateUUID("user"));
         user.setCreateTime(System.currentTimeMillis());
         boolean result = this.insert(user);
         if (result) {
+            userModel.setUserNo(user.getUserNo());
             UserToRole userToRole  = new UserToRole();
             userToRole.setUserNo(user.getUserNo());
             userToRole.setRoleCode(roleCode);
             userToRoleService.insert(userToRole);
         }
-        return user;
+        return userModel;
     }
 
     @Override
-    public Map<String, Object> getLoginUserAndMenuInfo(User user) {
-        Map<String, Object> result = new HashMap<>();
-        UserToRole userToRole = userToRoleService.selectByUserNo(user.getUserNo());
-        user.setToken(JWTUtil.sign(user.getUserNo(), user.getPassWord()));
-        result.put("user",user);
-        List<Menu> buttonList = new ArrayList<Menu>();
+    public LoginUserAndMenuModel getLoginUserAndMenuInfo(UserModel userModel) {
+        LoginUserAndMenuModel loginUserAndMenuModel = new LoginUserAndMenuModel();
+        UserToRole userToRole = userToRoleService.selectByUserNo(userModel.getUserNo());
+        userModel.setToken(JWTUtil.sign(userModel.getUserNo(), userModel.getPassWord()));
+        userModel.setPassWord(null);
+        loginUserAndMenuModel.setUserModel(userModel);
+        List<MenuModel> buttonList = new ArrayList<>();
         //根据角色主键查询启用的菜单权限
-        List<Menu> menuList = menuService.findMenuByRoleCode(userToRole.getRoleCode());
-        List<Menu> retMenuList = menuService.treeMenuList(Constant.ROOT_MENU, menuList);
-        for (Menu buttonMenu : menuList) {
+        List<MenuModel> menuList = menuService.findMenuByRoleCode(userToRole.getRoleCode());
+        List<MenuModel> retMenuList = menuService.treeMenuList(Constant.ROOT_MENU, menuList);
+        for (MenuModel buttonMenu : menuList) {
             if(buttonMenu.getMenuType() == Constant.TYPE_BUTTON){
                 buttonList.add(buttonMenu);
             }
         }
-        result.put("menuList",retMenuList);
-        result.put("buttonList",buttonList);
-        return result;
+        loginUserAndMenuModel.setMenuList(retMenuList);
+        loginUserAndMenuModel.setButtonList(buttonList);
+        return loginUserAndMenuModel;
     }
 
     @Override

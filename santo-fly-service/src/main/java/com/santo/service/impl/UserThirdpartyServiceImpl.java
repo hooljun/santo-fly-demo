@@ -5,6 +5,7 @@ import com.santo.entity.User;
 import com.santo.entity.UserThirdparty;
 import com.santo.mapper.UserThirdpartyMapper;
 import com.santo.model.ThirdPartyUser;
+import com.santo.model.UserModel;
 import com.santo.service.IUserService;
 import com.santo.service.IUserThirdpartyService;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
@@ -26,13 +27,13 @@ public class UserThirdpartyServiceImpl extends ServiceImpl<UserThirdpartyMapper,
     private IUserService userService;
 
     @Override
-    public User insertThirdPartyUser(ThirdPartyUser param, String password) throws Exception{
-        User sysUser = new User();
+    public UserModel insertThirdPartyUser(ThirdPartyUser param, String password) throws Exception{
+        UserModel sysUser = new UserModel();
         sysUser.setPassWord(password);
         sysUser.setUserName("游客"+param.getOpenid());
         sysUser.setMobile(param.getOpenid());
         sysUser.setAvatar(param.getAvatarUrl());
-        User register = userService.register(sysUser, Constant.RoleType.USER);
+        UserModel register = userService.register(sysUser, Constant.RoleType.USER);
         // 初始化第三方信息
         UserThirdparty thirdparty = new UserThirdparty();
         thirdparty.setProviderType(param.getProvider());

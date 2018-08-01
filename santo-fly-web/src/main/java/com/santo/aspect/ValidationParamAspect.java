@@ -20,6 +20,16 @@ import java.lang.reflect.Method;
  * @since on 2018/5/10.
  */
 public class ValidationParamAspect implements AspectApi{
+
+    /**
+     * 注意，使用该方法只能是一个应用类型含多属性的bean !!!
+     * @param obj
+     * @param pjp
+     * @param method
+     * @param isAll
+     * @return
+     * @throws Throwable
+     */
     @Override
     public Object doHandlerAspect(Object [] obj ,ProceedingJoinPoint pjp, Method method,boolean isAll) throws Throwable{
        //获取注解的value值返回
@@ -30,11 +40,11 @@ public class ValidationParamAspect implements AspectApi{
         String requestURI = request.getRequestURI();
         //获取类名上的url
         String url = getMethodUrl(method);
-        if(requestURI.equals(url)) {
+        if(requestURI.endsWith(url)) {
             if (!ComUtil.isEmpty(validationParamValue)) {
                 for (int i = 0; i < obj.length; i++) {
-                    if (obj[i] instanceof JSONObject) {
-                        JSONObject jsonObject = JSONObject.parseObject(obj[i].toString());
+                    if (obj[i] instanceof Object) {
+                        JSONObject jsonObject = JSONObject.parseObject(JSONObject.toJSONString(obj[i]));
                         //是否有所有必须参数
                         hasAllRequired(jsonObject, validationParamValue);
                     } else {

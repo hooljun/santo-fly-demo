@@ -6,6 +6,7 @@ import com.santo.base.Constant;
 import com.santo.entity.Menu;
 import com.santo.entity.RoleToMenu;
 import com.santo.entity.UserToRole;
+import com.santo.model.MenuModel;
 import com.santo.model.RoleModel;
 import com.santo.service.IMenuService;
 import com.santo.service.IRoleService;
@@ -92,10 +93,10 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements IR
     @Override
     public Map<String, Object> getMenuByRoleCode(String roleCode) {
         Map<String,Object> retMap   =new HashMap<>();
-        List<Menu> menuList = menuService.findMenuByRoleCode(roleCode);
-        List<Menu> buttonList = new ArrayList<Menu>();
-        List<Menu> retMenuList = menuService.treeMenuList(Constant.ROOT_MENU, menuList);
-        for (Menu buttonMenu : menuList) {
+        List<MenuModel> menuList = menuService.findMenuByRoleCode(roleCode);
+        List<MenuModel> buttonList = new ArrayList<>();
+        List<MenuModel> retMenuList = menuService.treeMenuList(Constant.ROOT_MENU, menuList);
+        for (MenuModel buttonMenu : menuList) {
             if(buttonMenu.getMenuType() == Constant.TYPE_BUTTON){
                 buttonList.add(buttonMenu);
             }

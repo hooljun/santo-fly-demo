@@ -3,6 +3,8 @@ package com.santo.service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.santo.entity.User;
 import com.baomidou.mybatisplus.service.IService;
+import com.santo.model.LoginUserAndMenuModel;
+import com.santo.model.UserModel;
 
 import java.util.Map;
 
@@ -21,9 +23,9 @@ public interface IUserService extends IService<User> {
      * @param username 用户名
      * @return 用户
      */
-    User getUserByUserName(String username);
+    UserModel getUserByUserName(String username);
 
-    User getUserByMobile(String mobile);
+    UserModel getUserByMobile(String mobile);
 
     /**
      * 注册用户
@@ -31,9 +33,9 @@ public interface IUserService extends IService<User> {
      * @param roleCode
      * @return
      */
-    User register(User user, String roleCode);
+    UserModel register(UserModel user, String roleCode);
 
-    Map<String, Object> getLoginUserAndMenuInfo(User user);
+    LoginUserAndMenuModel getLoginUserAndMenuInfo(UserModel userModel);
 
     boolean deleteByUserNo(String userNo);
 
